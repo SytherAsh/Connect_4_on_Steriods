@@ -58,24 +58,23 @@ const RandomEventAlert: React.FC<RandomEventAlertProps> = ({
   return (
     <AnimatePresence>
       <MotionBox
-        className="random-event-animation"
+        className="random-event-notification"
         position="fixed"
-        top="50%"
+        bottom="20px"
         left="50%"
         zIndex={1000}
-        initial={{ opacity: 0, scale: 0.5, x: '-50%', y: '-50%' }}
-        animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
-        exit={{ opacity: 0, scale: 0.5, x: '-50%', y: '-50%' }}
+        initial={{ opacity: 0, y: 100, x: '-50%' }}
+        animate={{ opacity: 1, y: 0, x: '-50%' }}
+        exit={{ opacity: 0, y: 100, x: '-50%' }}
         transition={{ duration: 0.3 }}
-        p={6}
+        p={4}
         bg={bgColor}
         color={textColor}
         borderRadius="lg"
-        shadow="2xl"
+        shadow="lg"
         maxW="400px"
         width="90%"
         textAlign="center"
-        position="relative"
       >
         <CloseButton 
           position="absolute" 
@@ -84,27 +83,21 @@ const RandomEventAlert: React.FC<RandomEventAlertProps> = ({
           color="white" 
           onClick={onAnimationComplete} 
         />
-        <Flex direction="column" align="center" justify="center">
+        <Flex alignItems="center" justifyContent="center">
           <Icon
             as={EVENT_ICONS[event.id] || FaExclamationTriangle}
-            boxSize={10}
-            mb={3}
+            boxSize={8}
+            mr={3}
           />
-          <Heading size="lg" mb={2}>{event.name}</Heading>
-          <Text fontSize="md">{event.description}</Text>
-          {event.duration > 1 && (
-            <Text fontSize="sm" mt={3} opacity={0.8}>
-              Lasts for {event.duration} turns
-            </Text>
-          )}
-          <Button 
-            mt={4}
-            colorScheme="whiteAlpha"
-            size="sm"
-            onClick={onAnimationComplete}
-          >
-            Close
-          </Button>
+          <Box>
+            <Heading size="md" mb={1}>{event.name}</Heading>
+            <Text fontSize="sm" mb={2}>{event.description}</Text>
+            {event.duration > 1 && (
+              <Text fontSize="xs" fontStyle="italic">
+                Lasts for {event.duration} turns
+              </Text>
+            )}
+          </Box>
         </Flex>
       </MotionBox>
     </AnimatePresence>

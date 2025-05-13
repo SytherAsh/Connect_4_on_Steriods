@@ -27,7 +27,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-game/  # Virtual environment created by start_game.sh
+/game/
 
 # JavaScript / Node.js
 node_modules/

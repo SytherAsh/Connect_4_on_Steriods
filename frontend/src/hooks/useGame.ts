@@ -36,6 +36,7 @@ interface GameState {
   board: { [key: string]: BoardCell[] }; // column -> cells
   powerUps: { [key: string]: PlayerPowerUp };
   activeEvents: RandomEvent[];
+  isGravityFlipped: boolean; // Whether gravity is currently flipped (discs move upward)
   winState: {
     winner: string | null;
     winType: string | null;
@@ -87,11 +88,12 @@ export function useGame(roomId: string, playerId: string | null) {
       gravity_flip: {
         id: 'gravity_flip',
         name: 'Gravity Flip',
-        description: 'Flip gravity in a column',
+        description: 'Flip gravity to normal (downward) for a column',
         remainingUses: 1
       }
     },
     activeEvents: [],
+    isGravityFlipped: true, // Default to flipped gravity
     winState: {
       winner: null,
       winType: null,
@@ -358,8 +360,20 @@ export function useGame(roomId: string, playerId: string | null) {
               updatedBoard[column] = [];
             }
           } else if (effect.flipped) {
-            // Gravity flip - handled by backend, just display animation
-            // The updated state will come through other messages
+            // Gravity flip - toggle the gravity for the entire board
+            // In this implementation, we're toggling the global gravity state
+            if (message.power_up_id === 'gravity_flip') {
+              // Toggle the gravity state (since our default is flipped/upward gravity,
+              // using the power-up makes it normal/downward gravity)
+              return {
+                ...state,
+                board: updatedBoard,
+                powerUps: updatedPowerUps,
+                messages,
+                isGravityFlipped: !state.isGravityFlipped,
+                error: null // Clear any errors after power-up use
+              };
+            }
           }
 
           return {

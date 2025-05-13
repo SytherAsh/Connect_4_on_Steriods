@@ -41,6 +41,14 @@ h1, h2, h3, h4, h5, h6 {
   animation-fill-mode: forwards;
 }
 
+/* Animation for flipped gravity (moving upward) */
+.game-disc-flipped {
+  animation-name: risePiece;
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.5, 0, 1, 1);
+  animation-fill-mode: forwards;
+}
+
 @keyframes dropPiece {
   0% {
     transform: translateY(-300px);
@@ -50,9 +58,18 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+@keyframes risePiece {
+  0% {
+    transform: translateY(300px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
 /* Fix for events popup */
-.random-event-animation {
-  box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.5);
+.random-event-notification {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* Power-up active state */

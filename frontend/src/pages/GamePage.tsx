@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -26,23 +26,25 @@ import {
   AlertDescription,
   CloseButton,
 } from '@chakra-ui/react';
+import confetti from 'canvas-confetti';
 import GameBoard from '../components/GameBoard';
 import PlayersList from '../components/PlayersList';
 import PowerUpItem from '../components/PowerUpItem';
 import GameChat from '../components/GameChat';
 import RandomEventAlert from '../components/RandomEventAlert';
 import { useGame, PlayerPowerUp, RandomEvent } from '../hooks/useGame';
-import GameAPI from '../services/GameAPI';
+import GameAPI, { PowerUp } from '../services/GameAPI';
 
-interface GameParams {
-  roomId: string;
-}
-
+// Use the correct type for React Router v6 params
 const GamePage: React.FC = () => {
-  const { roomId } = useParams<GameParams>();
+  const params = useParams();
+  const roomId = params.roomId || '';
   const navigate = useNavigate();
   const toast = useToast();
   const bgColor = useColorModeValue('gray.50', 'gray.900');
+  
+  // Ref for confetti canvas
+  const confettiCanvasRef = useRef<HTMLCanvasElement>(null);
   
   // Local state
   const [playerId, setPlayerId] = useState<string | null>(null);
@@ -63,7 +65,7 @@ const GamePage: React.FC = () => {
   } = useDisclosure();
   
   // Initialize game hook
-  const game = useGame(roomId || '', playerId);
+  const game = useGame(roomId, playerId);
   
   // Load player ID from local storage
   useEffect(() => {
@@ -79,6 +81,34 @@ const GamePage: React.FC = () => {
     
     setIsLoading(false);
   }, [roomId, navigate]);
+  
+  // Watch for errors and show toast notifications
+  useEffect(() => {
+    if (game.error) {
+      toast({
+        title: "Game Error",
+        description: game.error,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  }, [game.error, toast]);
+  
+  // Handle power-up used notification
+  useEffect(() => {
+    // Monitor all power-up usage events
+    const lastMessage = game.messages[game.messages.length - 1];
+    if (lastMessage && lastMessage.message.includes('power-up')) {
+      toast({
+        title: 'Power-Up Used',
+        description: lastMessage.message,
+        status: 'info',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  }, [game.messages, toast]);
   
   // Load initial room data
   useEffect(() => {
@@ -109,12 +139,68 @@ const GamePage: React.FC = () => {
     loadRoom();
   }, [roomId, game, navigate, toast]);
   
+  // Celebration effect
+  const startCelebration = useCallback(() => {
+    const duration = 5 * 1000;
+    const animationEnd = Date.now() + duration;
+    const colors = ['#bb0000', '#ffffff', '#ffbb00', '#00bb00', '#0000bb'];
+    
+    const firework = () => {
+      confetti({
+        particleCount: 100,
+        startVelocity: 30,
+        spread: 360,
+        origin: {
+          x: Math.random(),
+          y: Math.random() - 0.2
+        },
+        colors: colors,
+        ticks: 200,
+        disableForReducedMotion: true
+      });
+      
+      // Continue animation loop
+      if (Date.now() < animationEnd) {
+        requestAnimationFrame(firework);
+      }
+    };
+    
+    // Fire confetti in different patterns
+    confetti({
+      particleCount: 200,
+      spread: 100,
+      origin: { y: 0.6 }
+    });
+    
+    // Start firework animation
+    firework();
+    
+    // Fire star-shaped confetti
+    setTimeout(() => {
+      confetti({
+        particleCount: 100,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 }
+      });
+      confetti({
+        particleCount: 100,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 }
+      });
+    }, 500);
+  }, []);
+  
   // Watch for game end
   useEffect(() => {
     if (game.winState.winner) {
+      if (game.winState.winner === playerId) {
+        startCelebration();
+      }
       openGameOverModal();
     }
-  }, [game.winState.winner, openGameOverModal]);
+  }, [game.winState.winner, playerId, openGameOverModal, startCelebration]);
   
   // Show random events
   useEffect(() => {
@@ -160,24 +246,33 @@ const GamePage: React.FC = () => {
           gravity_flip: {
             id: 'gravity_flip',
             name: 'Gravity Flip',
-            description: 'Flip gravity in a column',
+            description: 'Flip gravity to normal (downward) for the whole board',
             remainingUses: 1
           }
         };
         
         // Set default power-ups
-        game.updateGameState(state => ({
-          ...state,
+        game.updateGameState({
           powerUps: defaultPowerUps
-        }));
+        });
         
         // Attempt to load from API
         const powerUps = await GameAPI.getPlayerPowerUps(roomId, playerId);
         if (powerUps && Object.keys(powerUps).length > 0) {
-          game.updateGameState(state => ({
-            ...state,
-            powerUps
-          }));
+          // Convert API PowerUp format to PlayerPowerUp format
+          const playerPowerUps: { [key: string]: PlayerPowerUp } = {};
+          Object.entries(powerUps).forEach(([key, apiPowerUp]) => {
+            playerPowerUps[key] = {
+              id: apiPowerUp.id,
+              name: apiPowerUp.name,
+              description: apiPowerUp.description,
+              remainingUses: apiPowerUp.remaining_uses
+            };
+          });
+          
+          game.updateGameState({
+            powerUps: playerPowerUps
+          });
         }
       } catch (error) {
         console.error('Error loading power-ups:', error);
@@ -185,36 +280,8 @@ const GamePage: React.FC = () => {
     };
     
     loadPowerUps();
-  }, [roomId, playerId]);
-  
-  // Watch for errors and show toast notifications
-  useEffect(() => {
-    if (game.error) {
-      toast({
-        title: "Game Error",
-        description: game.error,
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-    }
-  }, [game.error, toast]);
-  
-  // Handle power-up used notification
-  useEffect(() => {
-    // Monitor all power-up usage events
-    const lastMessage = game.messages[game.messages.length - 1];
-    if (lastMessage && lastMessage.message.includes('power-up')) {
-      toast({
-        title: 'Power-Up Used',
-        description: lastMessage.message,
-        status: 'info',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  }, [game.messages, toast]);
-  
+  }, [roomId, playerId, game]);
+
   // Handle column click
   const handleColumnClick = (columnId: number) => {
     if (powerUpSelectionData) {
@@ -250,7 +317,6 @@ const GamePage: React.FC = () => {
         
       case 'column_bomb':
       case 'column_block':
-      case 'gravity_flip':
         setPowerUpSelectionData({
           id: powerUpId,
           requiresTarget: true,
@@ -259,6 +325,21 @@ const GamePage: React.FC = () => {
         toast({
           title: 'Select target column',
           description: 'Click on a column to use this power-up',
+          status: 'info',
+          duration: 3000,
+          isClosable: true,
+        });
+        break;
+        
+      case 'gravity_flip':
+        setPowerUpSelectionData({
+          id: powerUpId,
+          requiresTarget: true,
+        });
+        
+        toast({
+          title: 'Flip Gravity Direction',
+          description: 'Click on the board to toggle gravity to normal (downward) direction',
           status: 'info',
           duration: 3000,
           isClosable: true,
@@ -428,6 +509,19 @@ const GamePage: React.FC = () => {
   
   return (
     <Box minH="100vh" bg={bgColor} py={4}>
+      {/* Invisible canvas for confetti */}
+      <canvas 
+        ref={confettiCanvasRef}
+        style={{
+          position: 'fixed',
+          pointerEvents: 'none',
+          width: '100%',
+          height: '100%',
+          top: 0,
+          left: 0,
+          zIndex: 100
+        }}
+      />
       <Container maxW="container.xl">
         <VStack spacing={4} align="stretch">
           {/* Header */}
@@ -458,10 +552,10 @@ const GamePage: React.FC = () => {
               <AlertIcon />
               <AlertTitle>Waiting for players</AlertTitle>
               <AlertDescription>
-                {game.room?.players.length || 0} / {game.room?.max_players || 4} players have joined.
-                {game.room?.players.length >= 2 && ' The game can now be started.'}
+                {game.room?.players?.length || 0} / {game.room?.max_players || 4} players have joined.
+                {game.room?.players && game.room.players.length >= 2 && ' The game can now be started.'}
               </AlertDescription>
-              {game.room?.players.length >= 2 && game.player?.id === game.room?.players[0].id && (
+              {game.room?.players && game.room.players.length >= 2 && game.player?.id === game.room?.players[0].id && (
                 <Button 
                   ml="auto" 
                   colorScheme="purple" 
@@ -611,6 +705,7 @@ const GamePage: React.FC = () => {
                       isGameActive={!!game.room?.is_active && !game.winState.winner}
                       playerColors={getPlayerColors()}
                       winPositions={game.winState.positions}
+                      isGravityFlipped={game.isGravityFlipped}
                     />
                   </Box>
                 </VStack>

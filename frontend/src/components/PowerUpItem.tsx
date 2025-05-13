@@ -14,7 +14,7 @@ import {
   FaUndo, 
   FaBomb, 
   FaLock, 
-  FaArrowsUpDown, 
+  FaArrowDown, 
   FaExchangeAlt 
 } from 'react-icons/fa';
 
@@ -31,7 +31,7 @@ const POWER_UP_ICONS: { [key: string]: any } = {
   undo_move: FaUndo,
   column_bomb: FaBomb,
   column_block: FaLock,
-  gravity_flip: FaArrowsUpDown,
+  gravity_flip: FaArrowDown,
   steal_column: FaExchangeAlt,
 };
 

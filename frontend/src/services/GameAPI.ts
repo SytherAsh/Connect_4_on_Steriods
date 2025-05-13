@@ -94,17 +94,18 @@ async function fetchWithTimeout(
     }
     
     return response;
-  } catch (error) {
+  } catch (error: unknown) {
     // Clear the timeout if it was triggered by something else
     clearTimeout(timeoutId);
     
     // Handle specific errors
-    if (error.name === 'AbortError') {
+    if (error instanceof Error && error.name === 'AbortError') {
       throw new TimeoutError();
     } else if (error instanceof ApiError) {
       throw error;
     } else {
-      throw new NetworkError(`Network error: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new NetworkError(`Network error: ${errorMessage}`);
     }
   }
 }
@@ -117,7 +118,7 @@ export async function getRooms(): Promise<Room[]> {
     const response = await fetchWithTimeout(`${API_BASE_URL}/rooms`);
     const data = await response.json();
     return data.rooms;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching rooms:', error);
     
     // Create a user-friendly error message based on the error type
@@ -128,7 +129,8 @@ export async function getRooms(): Promise<Room[]> {
     } else if (error instanceof NetworkError) {
       throw new Error('Network issue: Please check your internet connection and try again.');
     } else {
-      throw new Error(`Failed to load rooms: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to load rooms: ${errorMessage}`);
     }
   }
 }
@@ -152,7 +154,7 @@ export async function createRoom(roomData: {
     
     const data = await response.json();
     return data.room;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating room:', error);
     
     if (error instanceof TimeoutError) {
@@ -169,7 +171,8 @@ export async function createRoom(roomData: {
     } else if (error instanceof NetworkError) {
       throw new Error('Network issue: Please check your internet connection and try again.');
     } else {
-      throw new Error(`Failed to create room: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to create room: ${errorMessage}`);
     }
   }
 }
@@ -191,7 +194,7 @@ export async function joinRoom(roomId: string, playerData: {
     });
     
     return await response.json();
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error joining room:', error);
     
     if (error instanceof TimeoutError) {
@@ -210,7 +213,8 @@ export async function joinRoom(roomId: string, playerData: {
     } else if (error instanceof NetworkError) {
       throw new Error('Network issue: Please check your internet connection and try again.');
     } else {
-      throw new Error(`Failed to join room: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to join room: ${errorMessage}`);
     }
   }
 }
@@ -228,7 +232,7 @@ export async function startGame(roomId: string): Promise<{ status: string; room:
     });
     
     return await response.json();
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error starting game:', error);
     
     if (error instanceof TimeoutError) {
@@ -246,7 +250,8 @@ export async function startGame(roomId: string): Promise<{ status: string; room:
     } else if (error instanceof NetworkError) {
       throw new Error('Network issue: Please check your internet connection and try again.');
     } else {
-      throw new Error(`Failed to start game: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to start game: ${errorMessage}`);
     }
   }
 }

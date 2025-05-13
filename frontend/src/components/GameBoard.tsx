@@ -5,9 +5,13 @@ import {
   Grid,
   GridItem,
   useColorModeValue,
+  Badge,
+  Icon,
+  Tooltip,
 } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import { BoardCell } from '../hooks/useGame';
+import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
 
 const MotionBox = motion(Box);
 const MotionFlex = motion(Flex);
@@ -19,6 +23,7 @@ interface GameBoardProps {
   isGameActive: boolean;
   playerColors: { [key: string]: string };
   winPositions?: [number, number][] | null;
+  isGravityFlipped?: boolean;
 }
 
 const GameBoard: React.FC<GameBoardProps> = ({
@@ -28,6 +33,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
   isGameActive,
   playerColors,
   winPositions,
+  isGravityFlipped = true,
 }) => {
   const [hoverColumn, setHoverColumn] = useState<number | null>(null);
   
@@ -66,13 +72,13 @@ const GameBoard: React.FC<GameBoardProps> = ({
             >
               {cell && (
                 <MotionBox
-                  className="game-disc"
+                  className={isGravityFlipped ? "game-disc-flipped" : "game-disc"}
                   position="absolute"
                   w="52px"
                   h="52px"
                   borderRadius="full"
-                  bg={playerColors[cell.playerId] || 'gray.400'}
-                  initial={{ y: -300 }}
+                  bg={cell.playerId !== null ? playerColors[cell.playerId] : 'gray.400'}
+                  initial={{ y: isGravityFlipped ? 300 : -300 }}
                   animate={{ y: 0 }}
                   transition={{ 
                     type: 'spring', 
@@ -93,7 +99,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
       columns.push(
         <Flex
           key={`col-${col}`}
-          direction="column-reverse"
+          direction={isGravityFlipped ? "column" : "column-reverse"}
           alignItems="center"
           cursor={isMyTurn && isGameActive ? 'pointer' : 'default'}
           onClick={() => isMyTurn && isGameActive && onColumnClick(col)}
@@ -109,11 +115,12 @@ const GameBoard: React.FC<GameBoardProps> = ({
           {hoverColumn === col && isMyTurn && isGameActive && (
             <MotionFlex
               position="absolute"
-              top="-30px"
+              top={isGravityFlipped ? "auto" : "-30px"}
+              bottom={isGravityFlipped ? "-30px" : "auto"}
               left="0"
               right="0"
               justify="center"
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: isGravityFlipped ? 10 : -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
             >
@@ -143,6 +150,25 @@ const GameBoard: React.FC<GameBoardProps> = ({
       mb={4}
       position="relative"
     >
+      {/* Gravity direction indicator */}
+      <Tooltip 
+        label={isGravityFlipped ? "Gravity is reversed (pieces go upward)" : "Normal gravity (pieces fall down)"} 
+        placement="top"
+      >
+        <Badge 
+          position="absolute" 
+          top="8px" 
+          right="8px" 
+          colorScheme={isGravityFlipped ? "purple" : "blue"} 
+          display="flex" 
+          alignItems="center"
+          px={2}
+          py={1}
+          borderRadius="md"
+        >
+          Gravity <Icon as={isGravityFlipped ? FaArrowUp : FaArrowDown} ml={1} />
+        </Badge>
+      </Tooltip>
       <Flex justify="center" align="center">
         {renderGrid()}
       </Flex>
