@@ -1,7 +1,7 @@
 /**
  * API service for Connect 4 on Steroids game
  */
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://172.26.88.190:8000';
 
 // Custom error types for better error handling
 export class ApiError extends Error {

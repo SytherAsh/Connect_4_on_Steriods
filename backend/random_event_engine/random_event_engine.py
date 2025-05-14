@@ -11,7 +11,7 @@ import httpx
 import time
 
 # Initialize Redis client for state persistence
-redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+redis_client = redis.Redis(host='172.26.88.190', port=6379, db=0, decode_responses=True)
 
 # Initialize FastAPI app
 app = FastAPI(title="Connect 4 on Steroids - Random Event Engine")
@@ -40,7 +40,7 @@ class ActiveEvent(BaseModel):
     affected_players: List[str] = []
 
 # Column node service URLs
-COLUMN_NODE_BASE_URL = "http://localhost:{}"
+COLUMN_NODE_BASE_URL = "http://172.26.88.190:{}"
 COLUMN_NODE_PORTS = {
     0: 8001,
     1: 8002,
@@ -52,7 +52,7 @@ COLUMN_NODE_PORTS = {
 }
 
 # Coordinator URL
-COORDINATOR_URL = "http://localhost:8000"
+COORDINATOR_URL = "http://172.26.88.190:8000"
 
 # Random event definitions
 RANDOM_EVENTS = {

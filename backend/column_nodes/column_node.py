@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from typing import Dict, List, Optional, Any
 
 # Initialize Redis client for state persistence
-redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+redis_client = redis.Redis(host='172.26.88.190', port=6379, db=0, decode_responses=True)
 
 # Parse column ID from command line arguments
 if len(sys.argv) > 1:

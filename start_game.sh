@@ -171,10 +171,10 @@ fi
 cd ..
 
 echo "✨ Game is ready!"
-echo "📱 Frontend: http://localhost:3000"
-echo "🔌 Backend API: http://localhost:8000"
-echo "🎲 Power-Up Service: http://localhost:8010"
-echo "⚡ Random Event Engine: http://localhost:8020"
+echo "📱 Frontend: http://172.26.88.190:3000"
+echo "🔌 Backend API: http://172.26.88.190:8000"
+echo "🎲 Power-Up Service: http://172.26.88.190:8010"
+echo "⚡ Random Event Engine: http://172.26.88.190:8020"
 echo ""
 echo "Press Ctrl+C to stop all processes"
 

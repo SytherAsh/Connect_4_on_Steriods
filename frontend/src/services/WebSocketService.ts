@@ -33,7 +33,7 @@ class WebSocketService {
    */
   connect(playerId: string) {
     this.playerId = playerId;
-    this.connectionUrl = `ws://localhost:8000/ws/${playerId}`;
+    this.connectionUrl = `ws://172.26.88.190:8000/ws/${playerId}`;
     
     try {
       this.socket = new WebSocket(this.connectionUrl);

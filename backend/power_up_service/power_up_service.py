@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Any
 import httpx
 
 # Initialize Redis client for state persistence
-redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+redis_client = redis.Redis(host='172.26.88.190', port=6379, db=0, decode_responses=True)
 
 # Initialize FastAPI app
 app = FastAPI(title="Connect 4 on Steroids - Power-Up Service")
@@ -38,7 +38,7 @@ class PlayerPowerUps(BaseModel):
 room_player_power_ups: Dict[str, Dict[str, PlayerPowerUps]] = {}
 
 # Column node service URLs (for power-up effects)
-COLUMN_NODE_BASE_URL = "http://localhost:{}"
+COLUMN_NODE_BASE_URL = "http://172.26.88.190:{}"
 COLUMN_NODE_PORTS = {
     0: 8001,
     1: 8002,

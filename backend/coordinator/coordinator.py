@@ -54,7 +54,7 @@ active_connections: Dict[str, WebSocket] = {}
 rooms: Dict[str, Room] = {}
 
 # Column node service URLs
-COLUMN_NODE_BASE_URL = "http://localhost:{}"
+COLUMN_NODE_BASE_URL = "http://172.26.88.190:{}"
 COLUMN_NODE_PORTS = {
     0: 8001,
     1: 8002,
@@ -66,8 +66,8 @@ COLUMN_NODE_PORTS = {
 }
 
 # Other service URLs
-POWER_UP_SERVICE_URL = "http://localhost:8010"
-RANDOM_EVENT_ENGINE_URL = "http://localhost:8020"
+POWER_UP_SERVICE_URL = "http://172.26.88.190:8010"
+RANDOM_EVENT_ENGINE_URL = "http://172.26.88.190:8020"
 
 # WebSocket connection manager
 class ConnectionManager:
