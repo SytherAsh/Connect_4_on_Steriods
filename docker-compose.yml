@@ -1,0 +1,203 @@
+version: '3'
+
+services:
+  # Redis for state persistence and pub/sub
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+  # Frontend service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - coordinator
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    restart: unless-stopped
+
+  # Game coordinator service
+  coordinator:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: uvicorn coordinator.coordinator:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    restart: unless-stopped
+
+  # Column node services (7 columns)
+  column0:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python column_nodes/column_node.py 0
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+      - coordinator
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    restart: unless-stopped
+
+  column1:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python column_nodes/column_node.py 1
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+      - coordinator
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    restart: unless-stopped
+
+  column2:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python column_nodes/column_node.py 2
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+      - coordinator
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    restart: unless-stopped
+
+  column3:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python column_nodes/column_node.py 3
+    ports:
+      - "8004:8004"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+      - coordinator
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    restart: unless-stopped
+
+  column4:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python column_nodes/column_node.py 4
+    ports:
+      - "8005:8005"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+      - coordinator
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    restart: unless-stopped
+
+  column5:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python column_nodes/column_node.py 5
+    ports:
+      - "8006:8006"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+      - coordinator
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    restart: unless-stopped
+
+  column6:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: python column_nodes/column_node.py 6
+    ports:
+      - "8007:8007"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+      - coordinator
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    restart: unless-stopped
+
+  # Power-up service
+  power-up-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: uvicorn power_up_service.power_up_service:app --host 0.0.0.0 --port 8010 --reload
+    ports:
+      - "8010:8010"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+      - coordinator
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    restart: unless-stopped
+
+  # Random event engine
+  random-event-engine:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: uvicorn random_event_engine.random_event_engine:app --host 0.0.0.0 --port 8020 --reload
+    ports:
+      - "8020:8020"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+      - coordinator
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    restart: unless-stopped
+
+volumes:
+  redis-data: 
