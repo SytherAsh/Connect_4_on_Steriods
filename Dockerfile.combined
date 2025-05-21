@@ -1,0 +1,56 @@
+FROM node:16-alpine
+
+# Create app directory
+WORKDIR /app
+
+# Copy the entire backend directory first
+COPY backend /app/backend/
+
+# Install dependencies for backend if package.json exists
+WORKDIR /app/backend
+RUN if [ -f package.json ]; then \
+      npm install; \
+    else \
+      echo "No package.json found in backend directory, skipping npm install"; \
+    fi
+
+# Install dependencies for RabbitMQ demo
+WORKDIR /app/backend/rabbitmq_demo
+RUN if [ -f package.json ]; then \
+      npm install; \
+    else \
+      echo "No package.json found in rabbitmq_demo directory, skipping npm install"; \
+    fi
+
+# Create startup script
+WORKDIR /app
+RUN echo '#!/bin/sh' > /app/start.sh && \
+    echo '' >> /app/start.sh && \
+    echo '# Wait for RabbitMQ to be fully ready' >> /app/start.sh && \
+    echo 'echo "Waiting for RabbitMQ to be fully ready..."' >> /app/start.sh && \
+    echo 'sleep 10' >> /app/start.sh && \
+    echo '' >> /app/start.sh && \
+    echo '# Check if backend has a start script' >> /app/start.sh && \
+    echo 'if [ -f /app/backend/package.json ] && grep -q "start" /app/backend/package.json; then' >> /app/start.sh && \
+    echo '  echo "Starting backend server..."' >> /app/start.sh && \
+    echo '  cd /app/backend && npm start &' >> /app/start.sh && \
+    echo 'fi' >> /app/start.sh && \
+    echo '' >> /app/start.sh && \
+    echo '# Check if RabbitMQ demo exists and has the demo script' >> /app/start.sh && \
+    echo 'if [ -f /app/backend/rabbitmq_demo/package.json ] && grep -q "demo" /app/backend/rabbitmq_demo/package.json; then' >> /app/start.sh && \
+    echo '  echo "Starting RabbitMQ demo..."' >> /app/start.sh && \
+    echo '  cd /app/backend/rabbitmq_demo && npm run demo' >> /app/start.sh && \
+    echo 'else' >> /app/start.sh && \
+    echo '  echo "Starting RabbitMQ standard demo..."' >> /app/start.sh && \
+    echo '  cd /app/backend/rabbitmq_demo && npm start' >> /app/start.sh && \
+    echo 'fi' >> /app/start.sh && \
+    echo '' >> /app/start.sh && \
+    echo '# Keep container running if demo fails or does not exist' >> /app/start.sh && \
+    echo 'tail -f /dev/null' >> /app/start.sh && \
+    chmod +x /app/start.sh
+
+# Expose the backend port
+EXPOSE 8000
+
+# Command to run the application
+CMD ["/app/start.sh"] 

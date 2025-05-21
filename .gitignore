@@ -1,0 +1,89 @@
+# Python
+frontend/node_modules
+backend/rabbitmq_demo/node_modules
+
+RABBITMQ-INTEGRATION.md
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+bin/
+include/
+lib64
+pyvenv.cfg
+pip-selfcheck.json
+game/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Frontend
+node_modules/
+coverage/
+build/
+.next/
+
+# Docker
+.dockerignore
+
+# Database
+*.sqlite3
+*.db
+
+# Misc
+.coverage
+htmlcov/
+.pytest_cache/
+random.txt
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db 
