@@ -1,0 +1,16 @@
+{
+  "name": "connect4-rabbitmq-demo",
+  "version": "1.0.0",
+  "description": "RabbitMQ integration demo for Connect 4 on Steroids game",
+  "main": "game_events_queue.js",
+  "scripts": {
+    "start": "node game_events_queue.js",
+    "demo": "node demo_simulation.js",
+    "continuous": "node continuous_simulation.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.3",
+    "uuid": "^9.0.0"
+  }
+} 
